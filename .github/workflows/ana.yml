@@ -1,0 +1,31 @@
+name: 'Ana Bot'
+
+on:
+  push:
+  schedule:
+    #  https://crontab.guru/
+    #  “At every 20th minute past every hour from 10 through 22.”
+    - cron: '*/10 2-14 * * *'
+
+jobs:
+  bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout codes'
+        uses: actions/checkout@v1
+      - name: 'ana'
+        run: ruby ./github_actions/ana.rb
+      - name: 'Get Date'
+        run: echo "REPORT_DATE=$(TZ=':Asia/Shanghai' date '+%Y-%m-%d %T')" >> $GITHUB_ENV
+      - name: 'Send mail'
+        uses: dawidd6/action-send-mail@master
+        with:
+          server_address: smtp.163.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: Ana (${{env.REPORT_DATE}})
+          body: file://ana.html
+          to: gekang15@163.com
+          from: GitHub Actions
+          content_type: text/html

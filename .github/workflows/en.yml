@@ -1,0 +1,31 @@
+name: 'En Bot'
+
+on:
+  push:
+  schedule:
+    #  https://crontab.guru/
+    #  “At 02:24.” 国际时间，需要换算成北京时间 10:24
+    - cron: '24 6 * * *'
+
+jobs:
+  bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout codes'
+        uses: actions/checkout@v1
+      - name: 'en'
+        run: ruby ./github_actions/en.rb
+      - name: 'Get Date'
+        run: echo "REPORT_DATE=$(TZ=':Asia/Shanghai' date '+%Y-%m-%d %T')" >> $GITHUB_ENV
+      - name: 'Send mail'
+        uses: dawidd6/action-send-mail@master
+        with:
+          server_address: smtp.163.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: En (${{env.REPORT_DATE}})
+          body: file://en.html
+          to: gekang15@163.com
+          from: GitHub Actions
+          content_type: text/html
