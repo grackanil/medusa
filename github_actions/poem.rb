@@ -5,7 +5,7 @@ require 'net/http'
 require 'net/https'
 require 'uri'
 require 'json'
-def getPoem(token)
+def getPoem(token, appId, apiKey)
   url = URI("https://v2.jinrishici.com/sentence")
   https = Net::HTTP.new(url.host, url.port)
   https.use_ssl = true
@@ -31,4 +31,5 @@ def getPoem(token)
     end
   end
 end
-getPoem(ARGV[0])
+
+getPoem(ARGV[0], ARGV[1], ARGV[2])

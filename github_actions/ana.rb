@@ -6,7 +6,7 @@ require 'net/https'
 require 'uri'
 require 'json'
 
-def ana
+def ana(appId, apiKey)
   # https://developer.hitokoto.cn/
   types = {
       "a" => "动画",
@@ -24,11 +24,11 @@ def ana
   }
   query=types.keys.map!{|key| "c=#{key}"}.join("&")
   url = URI("https://v1.hitokoto.cn?#{query}")
-  puts url
   https = Net::HTTP.new(url.host, url.port)
   https.use_ssl = true
   request = Net::HTTP::Get.new(url)
   res = https.request(request).body
+  puts res.class
   response = JSON.parse(res)
   File.open("ana.html","a+") do |f|
     key = response["type"]
@@ -40,6 +40,17 @@ def ana
     f.puts "type:#{types[key]}<br />"
     f.puts "who:‍#{from_who_str} where:#{from_str}<br />"
   end
+
+  url = URI("https://api2.bmob.cn/1/classes/Ana")
+  https = Net::HTTP.new(url.host, url.port)
+  https.use_ssl = true
+  request = Net::HTTP::Post.new(url)
+  request["X-Bmob-Application-Id"] = appId
+  request["X-Bmob-REST-API-Key"] = apiKey
+  request["Content-Type"] = "application/json"
+  request.body = res
+  response = https.request(request)
+  puts response.read_body
 end
 
-ana
+ana(ARGV[0], ARGV[1])
