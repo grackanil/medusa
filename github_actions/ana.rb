@@ -5,8 +5,9 @@ require 'net/http'
 require 'net/https'
 require 'uri'
 require 'json'
+require 'digest'
 
-def ana(appId, apiKey)
+def ana(secret_key, safe_token)
   # https://developer.hitokoto.cn/
   types = {
       "a" => "动画",
@@ -40,14 +41,40 @@ def ana(appId, apiKey)
     f.puts "type:#{types[key]}<br />"
     f.puts "who:‍#{from_who_str} where:#{from_str}<br />"
   end
+  uploadBmob(secret_key, safe_token, res)
+end
 
-  url = URI("https://api2.bmob.cn/1/classes/Ana")
+def getTimestamp
+  Time.now.to_i * 1000
+end
+
+def md5(sign)
+  Digest::MD5.hexdigest sign
+end
+
+# 获取 16 位随机串
+def getNoncestr
+  chars = ('a'..'z').to_a + (0..9).to_a + ('A'..'Z').to_a
+  chars.shuffle[0..15].join
+end
+
+# 上传至 Bmob 后台
+# http://doc.bmob.cn/data/restful/develop_doc/#_4
+def uploadBmob(secret_key, safe_token, res)
+  timestamp = getTimestamp()
+  path = "/1/classes/Ana"
+  noncestr = getNoncestr()
+  sign = md5(path + timestamp.to_s + safe_token + noncestr)
+  url = URI("https://api2.bmob.cn" + path)
   https = Net::HTTP.new(url.host, url.port)
   https.use_ssl = true
   request = Net::HTTP::Post.new(url)
-  request["X-Bmob-Application-Id"] = appId
-  request["X-Bmob-REST-API-Key"] = apiKey
-  request["Content-Type"] = "application/json"
+  request["content-type"] = "application/json"
+  request["X-Bmob-SDK-Type"] = "API"
+  request["X-Bmob-Safe-Timestamp"] = timestamp
+  request["X-Bmob-Noncestr-Key"] = noncestr
+  request["X-Bmob-Secret-Key"] = secret_key
+  request["X-Bmob-Safe-Sign"] = sign
   request.body = res
   response = https.request(request)
   puts response.read_body

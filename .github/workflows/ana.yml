@@ -4,8 +4,8 @@ on:
   push:
   schedule:
     #  https://crontab.guru/
-    #  “At every 20th minute past every hour from 10 through 22.”
-    - cron: '0 2-14 * * *'
+    #  “At every 20th minute from 0 through 59.”
+    - cron: '0/20 * * * *'
 
 jobs:
   bot:
@@ -14,18 +14,18 @@ jobs:
       - name: 'Checkout codes'
         uses: actions/checkout@v1
       - name: 'ana'
-        run: ruby ./github_actions/ana.rb ${{secrets.BMOB_APPLICATION_ID}} ${{secrets.BMOB_REST_API_KEY}}
+        run: ruby ./github_actions/ana.rb ${{secrets.BMOB_SECRET_KEY}} ${{secrets.BMOB_SAFE_TOKEN}}
       - name: 'Get Date'
         run: echo "REPORT_DATE=$(TZ=':Asia/Shanghai' date '+%Y-%m-%d %T')" >> $GITHUB_ENV
-      - name: 'Send mail'
-        uses: dawidd6/action-send-mail@master
-        with:
-          server_address: smtp.163.com
-          server_port: 465
-          username: ${{ secrets.MAIL_USERNAME }}
-          password: ${{ secrets.MAIL_PASSWORD }}
-          subject: Ana (${{env.REPORT_DATE}})
-          body: file://ana.html
-          to: gekang15@163.com
-          from: GitHub Actions
-          content_type: text/html
+#      - name: 'Send mail'
+#        uses: dawidd6/action-send-mail@master
+#        with:
+#          server_address: smtp.163.com
+#          server_port: 465
+#          username: ${{ secrets.MAIL_USERNAME }}
+#          password: ${{ secrets.MAIL_PASSWORD }}
+#          subject: Ana (${{env.REPORT_DATE}})
+#          body: file://ana.html
+#          to: gekang15@163.com
+#          from: GitHub Actions
+#          content_type: text/html
